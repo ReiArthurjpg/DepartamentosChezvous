@@ -1,0 +1,204 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Chez Vous - API de Departamentos & Colaboradores",
+    "description": "API RESTful para gerenciamento de departamentos, centros de custo, gestores responsáveis e colaboradores alocados da Chez Vous Produção & Eventos.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Engenharia Chez Vous",
+      "email": "engenharia@chezvous.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8003",
+      "description": "Servidor Docker Local (Porta 8003)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "AdminApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Chave administrativa para gestão de departamentos e colaboradores."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Departamentos",
+      "description": "Cadastro, listagem, indicadores, edição e exclusão de departamentos"
+    },
+    {
+      "name": "Colaboradores",
+      "description": "Gestão de pessoas cadastradas e vinculadas a cada departamento"
+    },
+    {
+      "name": "Infraestrutura",
+      "description": "Healthcheck de containers (MySQL + Redis)"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Infraestrutura"],
+        "summary": "Verifica a saúde da API, conexão com MySQL 8.4 e Redis",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": { "description": "Todos os serviços operacionais" },
+          "503": { "description": "Algum serviço degradado" }
+        }
+      }
+    },
+    "/api/v1/admin/departamentos/stats": {
+      "get": {
+        "tags": ["Departamentos"],
+        "summary": "Retorna os indicadores gerais de departamentos e colaboradores",
+        "operationId": "adminGetDepartamentoStats",
+        "security": [{ "AdminApiKey": [] }],
+        "responses": {
+          "200": { "description": "Contadores gerais" },
+          "401": { "description": "X-API-Key inválida" }
+        }
+      }
+    },
+    "/api/v1/admin/departamentos": {
+      "get": {
+        "tags": ["Departamentos"],
+        "summary": "Lista departamentos de forma paginada com busca, filtros e contagem de colaboradores",
+        "operationId": "adminListDepartamentos",
+        "security": [{ "AdminApiKey": [] }],
+        "parameters": [
+          { "name": "search", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "required": false, "schema": { "type": "string", "enum": ["Ativo", "Inativo"] } },
+          { "name": "sort", "in": "query", "required": false, "schema": { "type": "string", "enum": ["recent", "nome", "codigo", "colaboradores"] } }
+        ],
+        "responses": {
+          "200": { "description": "Lista paginada de departamentos" },
+          "401": { "description": "X-API-Key inválida" }
+        }
+      },
+      "post": {
+        "tags": ["Departamentos"],
+        "summary": "Cadastra um novo departamento",
+        "operationId": "adminCreateDepartamento",
+        "security": [{ "AdminApiKey": [] }],
+        "responses": {
+          "201": { "description": "Departamento cadastrado com sucesso" },
+          "409": { "description": "Código já cadastrado" },
+          "422": { "description": "Erro de validação" }
+        }
+      }
+    },
+    "/api/v1/admin/departamentos/{id}": {
+      "get": {
+        "tags": ["Departamentos"],
+        "summary": "Obtém detalhes completos do departamento e lista de pessoas cadastradas",
+        "operationId": "adminGetDepartamentoDetail",
+        "security": [{ "AdminApiKey": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Detalhes do departamento" },
+          "404": { "description": "Departamento não encontrado" }
+        }
+      },
+      "put": {
+        "tags": ["Departamentos"],
+        "summary": "Atualiza os dados de um departamento",
+        "operationId": "adminUpdateDepartamento",
+        "security": [{ "AdminApiKey": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Departamento atualizado com sucesso" },
+          "404": { "description": "Departamento não encontrado" }
+        }
+      },
+      "delete": {
+        "tags": ["Departamentos"],
+        "summary": "Exclui um departamento",
+        "operationId": "adminDeleteDepartamento",
+        "security": [{ "AdminApiKey": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "force", "in": "query", "required": false, "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": { "description": "Departamento removido" },
+          "409": { "description": "Departamento possui colaboradores vinculados" }
+        }
+      }
+    },
+    "/api/v1/admin/departamentos/{id}/colaboradores": {
+      "get": {
+        "tags": ["Colaboradores"],
+        "summary": "Lista as pessoas cadastradas em um departamento específico",
+        "operationId": "adminListColaboradoresByDepartamento",
+        "security": [{ "AdminApiKey": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Lista de colaboradores do departamento" }
+        }
+      },
+      "post": {
+        "tags": ["Colaboradores"],
+        "summary": "Adiciona um novo colaborador ao departamento",
+        "operationId": "adminCreateColaborador",
+        "security": [{ "AdminApiKey": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "201": { "description": "Colaborador adicionado com sucesso" },
+          "409": { "description": "E-mail já cadastrado" },
+          "422": { "description": "Erro de validação" }
+        }
+      }
+    },
+    "/api/v1/admin/colaboradores": {
+      "get": {
+        "tags": ["Colaboradores"],
+        "summary": "Lista todos os colaboradores cadastrados em todos os departamentos",
+        "operationId": "adminListAllColaboradores",
+        "security": [{ "AdminApiKey": [] }],
+        "responses": {
+          "200": { "description": "Lista de colaboradores" }
+        }
+      }
+    },
+    "/api/v1/admin/colaboradores/{colabId}": {
+      "put": {
+        "tags": ["Colaboradores"],
+        "summary": "Atualiza os dados ou departamento de um colaborador",
+        "operationId": "adminUpdateColaborador",
+        "security": [{ "AdminApiKey": [] }],
+        "parameters": [
+          { "name": "colabId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Colaborador atualizado com sucesso" }
+        }
+      },
+      "delete": {
+        "tags": ["Colaboradores"],
+        "summary": "Remove um colaborador do departamento",
+        "operationId": "adminDeleteColaborador",
+        "security": [{ "AdminApiKey": [] }],
+        "parameters": [
+          { "name": "colabId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Colaborador removido com sucesso" }
+        }
+      }
+    }
+  }
+}
+

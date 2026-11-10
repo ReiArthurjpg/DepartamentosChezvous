@@ -1,0 +1,27 @@
+DirectoryIndex index.php index.html public/index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Preserva cabeçalhos de autorização
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Bloqueia acesso externo direto a arquivos sensíveis
+    RewriteRule ^(\.env.*|composer\.(json|lock)|phpunit\.xml|docker-compose\.yml|README\.md|GEMINI\.md)$ - [F,L,NC]
+    RewriteRule ^(src|docker|tests|database|bin|vendor)/ - [F,L,NC]
+
+    # Rota /docs cai direto no index.php (Swagger UI)
+    RewriteRule ^docs/?$ index.php [QSA,L]
+
+    # Envia todas as rotas da API (/health, /openapi.json, /api/v1/...) para index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+<FilesMatch "^\.env|composer\.(json|lock)|phpunit\.xml">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
