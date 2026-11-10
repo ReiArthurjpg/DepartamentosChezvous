@@ -162,9 +162,9 @@ final class ColaboradorRepository
     {
         $stmt = $this->pdo->prepare("
             INSERT INTO colaboradores (
-                public_id, departamento_id, nome, cargo, email, telefone, avatar, status
+                public_id, departamento_id, nome, cargo, email, telefone, avatar
             ) VALUES (
-                :public_id, :departamento_id, :nome, :cargo, :email, :telefone, :avatar, :status
+                :public_id, :departamento_id, :nome, :cargo, :email, :telefone, :avatar
             )
         ");
 
@@ -176,7 +176,6 @@ final class ColaboradorRepository
             ':email' => $data['email'],
             ':telefone' => $data['telefone'],
             ':avatar' => $data['avatar'],
-            ':status' => $data['status'],
         ]);
 
         $id = (int) $this->pdo->lastInsertId();
@@ -199,8 +198,7 @@ final class ColaboradorRepository
                 cargo = :cargo,
                 email = :email,
                 telefone = :telefone,
-                avatar = :avatar,
-                status = :status
+                avatar = :avatar
             WHERE id = :id
         ");
 
@@ -211,7 +209,6 @@ final class ColaboradorRepository
             ':email' => $data['email'],
             ':telefone' => $data['telefone'],
             ':avatar' => $data['avatar'],
-            ':status' => $data['status'],
             ':id' => $id,
         ]);
 
@@ -241,7 +238,6 @@ final class ColaboradorRepository
             'email' => (string) ($row['email'] ?? ''),
             'telefone' => (string) ($row['telefone'] ?? ''),
             'avatar' => (string) ($row['avatar'] ?? 'CV'),
-            'status' => (string) ($row['status'] ?? 'Ativo'),
             'createdAt' => (string) ($row['created_at'] ?? ''),
             'updatedAt' => (string) ($row['updated_at'] ?? ''),
         ];

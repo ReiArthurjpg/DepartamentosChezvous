@@ -8,8 +8,6 @@ use App\Exception\ApiException;
 
 final class ColaboradorValidator
 {
-    private const ALLOWED_STATUSES = ['Ativo', 'Inativo'];
-
     /**
      * @param array<string, mixed> $input
      * @return array{
@@ -17,8 +15,7 @@ final class ColaboradorValidator
      *   cargo: string,
      *   email: string,
      *   telefone: string,
-     *   avatar: string,
-     *   status: string
+     *   avatar: string
      * }
      */
     public function validate(array $input, ?array $existing = null): array
@@ -27,7 +24,6 @@ final class ColaboradorValidator
         $cargo = trim((string) ($input['cargo'] ?? $existing['cargo'] ?? ''));
         $email = strtolower(trim((string) ($input['email'] ?? $existing['email'] ?? '')));
         $telefone = trim((string) ($input['telefone'] ?? $existing['telefone'] ?? ''));
-        $statusRaw = trim((string) ($input['status'] ?? $existing['status'] ?? 'Ativo'));
         $customAvatar = strtoupper(trim((string) ($input['avatar'] ?? '')));
 
         $errors = [];
@@ -55,11 +51,6 @@ final class ColaboradorValidator
             $errors['telefone'] = 'O telefone não pode exceder 30 caracteres.';
         }
 
-        $status = in_array($statusRaw, self::ALLOWED_STATUSES, true) ? $statusRaw : '';
-        if ($status === '') {
-            $errors['status'] = 'Status inválido. Valores permitidos: Ativo, Inativo.';
-        }
-
         if ($errors !== []) {
             throw ApiException::validation($errors);
         }
@@ -72,7 +63,6 @@ final class ColaboradorValidator
             'email' => $email,
             'telefone' => $telefone,
             'avatar' => $avatar,
-            'status' => $status,
         ];
     }
 

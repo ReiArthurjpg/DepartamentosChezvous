@@ -36,13 +36,12 @@ final class DepartamentoController
     #[OA\Get(
         path: '/api/v1/admin/departamentos',
         operationId: 'adminListDepartamentos',
-        summary: 'Lista departamentos de forma paginada com busca, filtros e contagem de colaboradores',
+        summary: 'Lista departamentos de forma paginada com busca, ordenação e contagem de colaboradores',
         tags: ['Departamentos'],
         security: [['AdminApiKey' => []]],
         parameters: [
             new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
-            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['Ativo', 'Inativo'])),
-            new OA\Parameter(name: 'sort', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['recent', 'nome', 'codigo', 'colaboradores'])),
+            new OA\Parameter(name: 'sort', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['default', 'recent', 'nome', 'codigo', 'colaboradores'])),
             new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 1)),
             new OA\Parameter(name: 'perPage', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 100)),
         ],
@@ -57,12 +56,11 @@ final class DepartamentoController
         $search = isset($query['search'])
             ? trim((string) $query['search'])
             : (isset($query['q']) ? trim((string) $query['q']) : null);
-        $status = isset($query['status']) ? trim((string) $query['status']) : null;
-        $sort = isset($query['sort']) ? trim((string) $query['sort']) : 'recent';
+        $sort = isset($query['sort']) ? trim((string) $query['sort']) : 'default';
         $page = max(1, (int) ($query['page'] ?? 1));
         $perPage = min(200, max(1, (int) ($query['perPage'] ?? 100)));
 
-        $result = $this->service->list($search, $status, $sort, $page, $perPage);
+        $result = $this->service->list($search, $sort, $page, $perPage);
         return JsonResponse::send($response, $result);
     }
 
@@ -133,33 +131,6 @@ final class DepartamentoController
 
         return JsonResponse::send($response, [
             'message' => 'Departamento atualizado com sucesso.',
-            'item' => $updated,
-        ]);
-    }
-
-    #[OA\Patch(
-        path: '/api/v1/admin/departamentos/{id}/status',
-        operationId: 'adminUpdateDepartamentoStatus',
-        summary: 'Altera o status operacional de um departamento (Ativo / Inativo)',
-        tags: ['Departamentos'],
-        security: [['AdminApiKey' => []]],
-        parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'Status atualizado'),
-            new OA\Response(response: 404, description: 'Departamento não encontrado'),
-        ]
-    )]
-    public function updateStatus(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
-    {
-        $id = (string) ($args['id'] ?? '');
-        $body = self::extractBody($request);
-        $status = (string) ($body['status'] ?? '');
-        $updated = $this->service->updateStatus($id, $status);
-
-        return JsonResponse::send($response, [
-            'message' => 'Status do departamento atualizado com sucesso.',
             'item' => $updated,
         ]);
     }

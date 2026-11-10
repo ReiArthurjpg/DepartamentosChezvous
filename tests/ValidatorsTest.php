@@ -21,7 +21,6 @@ final class ValidatorsTest extends TestCase
             'gestor' => 'Beatriz Fagundes',
             'email' => 'BEATRIZ@CHEZVOUS.COM',
             'descricao' => 'Confeitaria artística e sobremesas de eventos.',
-            'status' => 'Ativo',
         ]);
 
         self::assertSame('Pâtisserie & Confeitaria', $result['nome']);
@@ -29,7 +28,6 @@ final class ValidatorsTest extends TestCase
         self::assertSame('CC-107 - Doces Finos', $result['centro_custo']);
         self::assertSame('Beatriz Fagundes', $result['gestor']);
         self::assertSame('beatriz@chezvous.com', $result['email']);
-        self::assertSame('Ativo', $result['status']);
     }
 
     public function testDepartamentoValidatorRejectsEmptyFields(): void
@@ -71,7 +69,6 @@ final class ValidatorsTest extends TestCase
         self::assertSame('Cozinheiro Sênior', $result['cargo']);
         self::assertSame('rodrigo.almeida@chezvous.com', $result['email']);
         self::assertSame('RA', $result['avatar']);
-        self::assertSame('Ativo', $result['status']);
     }
 
     public function testColaboradorValidatorRejectsInvalidPhone(): void

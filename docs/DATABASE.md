@@ -9,7 +9,6 @@
 - `gestor` (`VARCHAR(160) NOT NULL`)
 - `email` (`VARCHAR(180) NOT NULL DEFAULT ''`)
 - `descricao` (`TEXT NULL`)
-- `status` (`ENUM('Ativo', 'Inativo') NOT NULL DEFAULT 'Ativo'`)
 - `created_at`, `updated_at` (`DATETIME`)
 
 ## Tabela `colaboradores`
@@ -21,6 +20,5 @@
 - `email` (`VARCHAR(180) NOT NULL UNIQUE`)
 - `telefone` (`VARCHAR(30) NOT NULL`)
 - `avatar` (`VARCHAR(8) NOT NULL`) — Iniciais geradas automaticamente
-- `status` (`ENUM('Ativo', 'Inativo') NOT NULL DEFAULT 'Ativo'`)
 - `created_at`, `updated_at` (`DATETIME`)
 

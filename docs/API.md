@@ -9,7 +9,7 @@ X-API-Key: <ADMIN_API_KEY>
 
 ### `GET /api/v1/admin/departamentos`
 Retorna a lista de departamentos com a contagem real de colaboradores vinculados (`colaboradores` / `colaboradoresCount`) e estatísticas globais.
-- Query params opcionais: `search`, `status` (`Ativo`|`Inativo`), `sort` (`recent`|`nome`|`codigo`|`colaboradores`), `page`, `perPage`.
+- Query params opcionais: `search`, `sort` (`default`|`recent`|`nome`|`codigo`|`colaboradores`), `page`, `perPage`.
 
 ### `POST /api/v1/admin/departamentos`
 Cria um novo departamento.
@@ -52,7 +52,7 @@ Adiciona um novo colaborador ao departamento `{id}`.
 ```
 
 ### `PUT /api/v1/admin/colaboradores/{colabId}`
-Atualiza nome, cargo, e-mail, telefone, status ou transfere o colaborador de departamento (`departamentoId`).
+Atualiza nome, cargo, e-mail, telefone ou transfere o colaborador de departamento (`departamentoId`).
 
 ### `DELETE /api/v1/admin/colaboradores/{colabId}`
 Remove o colaborador.

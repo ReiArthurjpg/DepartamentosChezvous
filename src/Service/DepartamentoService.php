@@ -31,27 +31,29 @@ final class DepartamentoService
      *   page: int,
      *   perPage: int,
      *   total: int,
+     *   nextSuggestedCodigo: string,
      *   stats: array<string, int>,
      *   items: array<int, array<string, mixed>>
      * }
      */
     public function list(
         ?string $search,
-        ?string $status,
-        string $sort = 'recent',
+        string $sort = 'default',
         int $page = 1,
         int $perPage = 100
     ): array {
         $page = max(1, $page);
         $perPage = min(200, max(1, $perPage));
 
-        $result = $this->departamentoRepo->paginate($search, $status, $sort, $page, $perPage);
+        $result = $this->departamentoRepo->paginate($search, $sort, $page, $perPage);
         $stats = $this->departamentoRepo->getStats();
+        $nextSuggestedCodigo = $this->departamentoRepo->getNextSuggestedCodigo();
 
         return [
             'page' => $page,
             'perPage' => $perPage,
             'total' => $result['total'],
+            'nextSuggestedCodigo' => $nextSuggestedCodigo,
             'stats' => $stats,
             'items' => $result['items'],
         ];
@@ -117,20 +119,6 @@ final class DepartamentoService
         }
 
         return $this->departamentoRepo->update($internalId, $validated);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function updateStatus(string $idOrCodigo, string $status): array
-    {
-        $existing = $this->departamentoRepo->findByPublicIdOrCodigo($idOrCodigo);
-        if ($existing === null) {
-            throw ApiException::notFound('Departamento não encontrado.');
-        }
-
-        $validatedStatus = $this->validator->validateStatus($status);
-        return $this->departamentoRepo->updateStatus((int) $existing['id'], $validatedStatus);
     }
 
     public function delete(string $idOrCodigo, bool $forceCascade = false): void

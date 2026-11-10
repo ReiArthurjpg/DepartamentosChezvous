@@ -226,7 +226,6 @@ $app->get('/', static function (ServerRequestInterface $request, ResponseInterfa
             'departamentos_create' => 'POST ' . $base . '/api/v1/admin/departamentos',
             'departamentos_detail' => 'GET ' . $base . '/api/v1/admin/departamentos/{id}',
             'departamentos_update' => 'PUT ' . $base . '/api/v1/admin/departamentos/{id}',
-            'departamentos_status' => 'PATCH ' . $base . '/api/v1/admin/departamentos/{id}/status',
             'departamentos_delete' => 'DELETE ' . $base . '/api/v1/admin/departamentos/{id}',
             'colaboradores_all' => 'GET ' . $base . '/api/v1/admin/colaboradores',
             'colaboradores_list_by_dep' => 'GET ' . $base . '/api/v1/admin/departamentos/{id}/colaboradores',
@@ -283,7 +282,6 @@ $app->group('/api/v1', function ($group): void {
         $d->get('/{id}', [DepartamentoController::class, 'detail']);
         $d->put('/{id}', [DepartamentoController::class, 'update']);
         $d->patch('/{id}', [DepartamentoController::class, 'update']);
-        $d->patch('/{id}/status', [DepartamentoController::class, 'updateStatus']);
         $d->delete('/{id}', [DepartamentoController::class, 'delete']);
         $d->get('/{id}/colaboradores', [ColaboradorController::class, 'listByDepartamento']);
         $d->post('/{id}/colaboradores', [ColaboradorController::class, 'create']);
@@ -303,7 +301,6 @@ $app->group('/api/v1', function ($group): void {
         $admin->get('/departamentos/{id}', [DepartamentoController::class, 'detail']);
         $admin->put('/departamentos/{id}', [DepartamentoController::class, 'update']);
         $admin->patch('/departamentos/{id}', [DepartamentoController::class, 'update']);
-        $admin->patch('/departamentos/{id}/status', [DepartamentoController::class, 'updateStatus']);
         $admin->delete('/departamentos/{id}', [DepartamentoController::class, 'delete']);
 
         $admin->get('/departamentos/{id}/colaboradores', [ColaboradorController::class, 'listByDepartamento']);

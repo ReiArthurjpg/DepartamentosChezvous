@@ -16,29 +16,32 @@ final class DepartamentoRepository
     /**
      * @return array{
      *   totalDepartamentos: int,
-     *   departamentosAtivos: int,
-     *   departamentosInativos: int,
      *   totalColaboradores: int
      * }
      */
     public function getStats(): array
     {
-        $row = $this->pdo->query("
-            SELECT
-                COUNT(*) AS total_departamentos,
-                SUM(CASE WHEN status = 'Ativo' THEN 1 ELSE 0 END) AS ativos,
-                SUM(CASE WHEN status = 'Inativo' THEN 1 ELSE 0 END) AS inativos
-            FROM departamentos
-        ")->fetch();
-
+        $totalDeps = (int) $this->pdo->query("SELECT COUNT(*) FROM departamentos")->fetchColumn();
         $totalColabs = (int) $this->pdo->query("SELECT COUNT(*) FROM colaboradores")->fetchColumn();
 
         return [
-            'totalDepartamentos' => (int) ($row['total_departamentos'] ?? 0),
-            'departamentosAtivos' => (int) ($row['ativos'] ?? 0),
-            'departamentosInativos' => (int) ($row['inativos'] ?? 0),
+            'totalDepartamentos' => $totalDeps,
             'totalColaboradores' => $totalColabs,
         ];
+    }
+
+    public function getNextSuggestedCodigo(): string
+    {
+        $total = (int) $this->pdo->query("SELECT COUNT(*) FROM departamentos")->fetchColumn();
+        $seq = $total + 1;
+        while ($seq < 1000) {
+            $candidate = sprintf('DEP-%02d', $seq);
+            if (!$this->existsByCodigo($candidate)) {
+                return $candidate;
+            }
+            $seq++;
+        }
+        return 'DEP-' . strtoupper(bin2hex(random_bytes(2)));
     }
 
     /**
@@ -46,18 +49,12 @@ final class DepartamentoRepository
      */
     public function paginate(
         ?string $search,
-        ?string $status,
         string $sort,
         int $page,
         int $perPage
     ): array {
         $conditions = [];
         $params = [];
-
-        if ($status !== null && $status !== '' && in_array($status, ['Ativo', 'Inativo'], true)) {
-            $conditions[] = 'd.status = :status';
-            $params[':status'] = $status;
-        }
 
         if ($search !== null && $search !== '') {
             $conditions[] = '(d.nome LIKE :q1 OR d.codigo LIKE :q2 OR d.gestor LIKE :q3 OR d.centro_custo LIKE :q4)';
@@ -78,6 +75,7 @@ final class DepartamentoRepository
             'nome', 'name' => 'd.nome ASC',
             'codigo' => 'd.codigo ASC',
             'colaboradores' => 'colaboradores_count DESC, d.nome ASC',
+            'recent' => 'd.id DESC',
             default => 'd.id ASC',
         };
 
@@ -187,9 +185,9 @@ final class DepartamentoRepository
     {
         $stmt = $this->pdo->prepare("
             INSERT INTO departamentos (
-                public_id, nome, codigo, centro_custo, gestor, email, descricao, status
+                public_id, nome, codigo, centro_custo, gestor, email, descricao
             ) VALUES (
-                :public_id, :nome, :codigo, :centro_custo, :gestor, :email, :descricao, :status
+                :public_id, :nome, :codigo, :centro_custo, :gestor, :email, :descricao
             )
         ");
 
@@ -201,7 +199,6 @@ final class DepartamentoRepository
             ':gestor' => $data['gestor'],
             ':email' => $data['email'],
             ':descricao' => $data['descricao'],
-            ':status' => $data['status'],
         ]);
 
         $id = (int) $this->pdo->lastInsertId();
@@ -224,8 +221,7 @@ final class DepartamentoRepository
                 centro_custo = :centro_custo,
                 gestor = :gestor,
                 email = :email,
-                descricao = :descricao,
-                status = :status
+                descricao = :descricao
             WHERE id = :id
         ");
 
@@ -236,22 +232,6 @@ final class DepartamentoRepository
             ':gestor' => $data['gestor'],
             ':email' => $data['email'],
             ':descricao' => $data['descricao'],
-            ':status' => $data['status'],
-            ':id' => $id,
-        ]);
-
-        $row = $this->findById($id);
-        return self::formatRow($row ?? []);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function updateStatus(int $id, string $status): array
-    {
-        $stmt = $this->pdo->prepare("UPDATE departamentos SET status = :status WHERE id = :id");
-        $stmt->execute([
-            ':status' => $status,
             ':id' => $id,
         ]);
 
@@ -299,7 +279,6 @@ final class DepartamentoRepository
             'colaboradores' => $count,
             'colaboradoresCount' => $count,
             'descricao' => (string) ($row['descricao'] ?? ''),
-            'status' => (string) ($row['status'] ?? 'Ativo'),
             'criadoEm' => $criadoEm,
             'createdAt' => $createdAtRaw,
             'updatedAt' => (string) ($row['updated_at'] ?? $createdAtRaw),

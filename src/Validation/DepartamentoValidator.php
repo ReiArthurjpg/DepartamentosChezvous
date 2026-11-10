@@ -8,8 +8,6 @@ use App\Exception\ApiException;
 
 final class DepartamentoValidator
 {
-    private const ALLOWED_STATUSES = ['Ativo', 'Inativo'];
-
     /**
      * @param array<string, mixed> $input
      * @return array{
@@ -18,8 +16,7 @@ final class DepartamentoValidator
      *   centro_custo: string,
      *   gestor: string,
      *   email: string,
-     *   descricao: string,
-     *   status: string
+     *   descricao: string
      * }
      */
     public function validate(array $input, ?array $existing = null): array
@@ -35,7 +32,6 @@ final class DepartamentoValidator
         $gestor = trim((string) ($input['gestor'] ?? $existing['gestor'] ?? ''));
         $email = strtolower(trim((string) ($input['email'] ?? $existing['email'] ?? '')));
         $descricao = trim((string) ($input['descricao'] ?? $existing['descricao'] ?? ''));
-        $statusRaw = trim((string) ($input['status'] ?? $existing['status'] ?? 'Ativo'));
 
         $errors = [];
 
@@ -67,11 +63,6 @@ final class DepartamentoValidator
             $errors['email'] = 'Informe um e-mail corporativo válido.';
         }
 
-        $status = in_array($statusRaw, self::ALLOWED_STATUSES, true) ? $statusRaw : '';
-        if ($status === '') {
-            $errors['status'] = 'Status inválido. Valores permitidos: Ativo, Inativo.';
-        }
-
         if ($errors !== []) {
             throw ApiException::validation($errors);
         }
@@ -83,19 +74,7 @@ final class DepartamentoValidator
             'gestor' => $gestor,
             'email' => $email,
             'descricao' => $descricao,
-            'status' => $status,
         ];
-    }
-
-    public function validateStatus(string $status): string
-    {
-        $trimmed = ucfirst(strtolower(trim($status)));
-        if (!in_array($trimmed, self::ALLOWED_STATUSES, true)) {
-            throw ApiException::validation([
-                'status' => 'Status inválido. Use Ativo ou Inativo.',
-            ]);
-        }
-        return $trimmed;
     }
 }
 

@@ -35,12 +35,11 @@ Este documento contém o contexto de arquitetura, regras de negócio, infraestru
 
 Todos os endpoints administrativos exigem o header `X-API-Key: <ADMIN_API_KEY>`.
 
-* `GET /api/v1/admin/departamentos/stats`: Indicadores gerais (`totalDepartamentos`, `departamentosAtivos`, `departamentosInativos`, `totalColaboradores`).
-* `GET /api/v1/admin/departamentos`: Listagem paginada com busca (`search`), filtro de `status` e contagem de colaboradores em tempo real.
+* `GET /api/v1/admin/departamentos/stats`: Indicadores gerais (`totalDepartamentos`, `totalColaboradores`).
+* `GET /api/v1/admin/departamentos`: Listagem paginada com busca (`search`), ordenação (`sort`) e contagem de colaboradores em tempo real.
 * `POST /api/v1/admin/departamentos`: Criação de novo departamento.
 * `GET /api/v1/admin/departamentos/{id}`: Detalhes do departamento + lista de pessoas cadastradas (`pessoas`).
 * `PUT /api/v1/admin/departamentos/{id}`: Atualização cadastral do departamento.
-* `PATCH /api/v1/admin/departamentos/{id}/status`: Alternância de status (`Ativo` / `Inativo`).
 * `DELETE /api/v1/admin/departamentos/{id}`: Exclusão do departamento (`?force=1` opcional).
 * `GET /api/v1/admin/departamentos/{id}/colaboradores`: Lista de colaboradores do departamento com filtro de busca (`search`).
 * `POST /api/v1/admin/departamentos/{id}/colaboradores`: Adiciona um novo colaborador ao departamento.
